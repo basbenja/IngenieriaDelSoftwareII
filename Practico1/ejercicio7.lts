@@ -1,0 +1,11 @@
+// Ejercicio 7
+range A = 1..6
+set Values = {[1], [2], [4]}
+
+DRINKS = (coins[i:Values]->AMOUNT[i]),
+AMOUNT[j:A] = (
+	// Todavía no alcanza
+	when (j<=2) coins[k:Values]->AMOUNT[j+k]
+	// Ya alcanza, devolvé el vuelto
+	|when (j>=3 && j<=6) coins[j-3]->DRINKS
+).

@@ -1,0 +1,32 @@
+const N = 10
+range T = 0..N
+// El alfabeto de la variable compartida se declara explícitamente
+set VarAlpha = {value.{read[T],write[T]}}
+
+DIRECTOR = (open->close->DIRECTOR).
+
+CONTROLLER = (open->close->CONTROLLER).
+
+VAR = VAR[0],
+VAR[u:T] = (
+    read[u]->VAR[u]
+    |write[v:T]->VAR[v]
+).
+
+EAST = (open->RUN),
+RUN = (
+    arrive->INCREMENT
+    |close->EAST
+),
+INCREMENT = (value.read[x:T]->value.write[x+1]->RUN)+VarAlpha.
+
+WEST = (open->RUN),
+RUN = (
+    leave->DECREASE
+    |close->CHECK_NO_ONE
+),
+CHECK_NO_ONE = (value.read[x:T]->(
+    when (value>0) RUN
+    |when (value==0) WEST
+)),
+DECREASE = (value.read[x:T]->value.write[x-1]->RUN)+VarAlpha.

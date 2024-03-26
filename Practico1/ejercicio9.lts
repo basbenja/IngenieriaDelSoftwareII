@@ -1,0 +1,16 @@
+// Ejercicio 8
+P = (a->b->P).
+Q = (c->b->Q).
+
+/*
+Al hacer la composición, las acciones comunes se sincronizan.
+En este caso, la única acción común es b. Entonces, como las dos b van a
+estar sincronizadas lo que va pasar es que: si se hace a primero, entonces
+para poder hacer b, se tiene que haber hecho c antes (de b). Y si se hace c
+primero, entonces para poder hacer c, se tiene que haber hecho a antes (de
+b).
+*/
+||S1 = (P || Q).
+
+S2 = (a->c->b->S2|c->a->b->S2).
+

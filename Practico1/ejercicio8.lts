@@ -1,0 +1,6 @@
+RADIO = (on->highest->RUN),
+RUN = (
+    reset->highest->RUN
+    |scan->(lowest->RUN|found->RUN)
+    |off->RADIO
+).

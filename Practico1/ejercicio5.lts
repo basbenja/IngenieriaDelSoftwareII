@@ -1,0 +1,2 @@
+// Ejercicio 5
+BISTABLE = (trigger->one->trigger->zero->BISTABLE).

@@ -1,0 +1,44 @@
+// Ejercicio 6
+/*
+INTERPRETACTION: cuando está en un nivel, se queda emitiendo la señal correspondiente
+hasta que llegue un valor que la haga cambiar (o no):
+*/
+/*
+SENSOR = ({level[0..1]} -> LOW
+         |{level[8..9]} -> HIGH
+         |{level[2..7]} -> SENSOR
+         |normal -> SENSOR),
+LOW = ({level[0..1]} -> LOW
+      |{level[8..9]} -> HIGH
+      |{level[2..7]} -> SENSOR
+      |low -> LOW),
+HIGH = ({level[0..1]} -> LOW
+       |{level[8..9]} -> HIGH
+       |{level[2..7]} -> SENSOR
+       |high -> HIGH).
+*/
+/*
+LA SOLUCION ANTERIOR NO ES CORRECTA porque nunca emite señales de ningún nivel (ver el gráfico).
+Es como que solo emite señales de mediciones. En esta solución, yo estaba pensando el hecho de
+estar en un nivel como estar en uno de los nodos, y no como emitir una señal de ese nivel. Es como
+si estando en un nivel, podía emitir cualquier nivel y no necesariamente el que correspondía.
+*/
+
+range L = 0..9
+SENSOR = (normal->LEVEL),
+LEVEL = (measure[i:L]->(
+	when(i<2) low->LEVEL
+	|when (i>=2 && i<=8) normal->LEVEL
+	|when (i>8) high->LEVEL
+)).
+
+// Otra solución (parecida)
+SENSOR2 = LEVEL[1],
+LEVEL[0] = (low->MEASURE),
+LEVEL[1] = (normal->MEASURE),
+LEVEL[2] = (high->MEASURE),
+MEASURE = (
+	measure[0..1]->LEVEL[0]
+	|measure[2..7]->LEVEL[1]
+	|measure[9]->LEVEL[2]
+).
