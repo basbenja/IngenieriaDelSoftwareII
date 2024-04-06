@@ -1,0 +1,10 @@
+range T = 0..1
+VAR = VAR[0],
+VAR[i:T] = (
+    read[i]->VAR[i]
+    |write[j:T]->VAR[j]
+).
+
+LOCK = (acquire->release->LOCK).
+
+||LOCKVAR = (LOCK || VAR).

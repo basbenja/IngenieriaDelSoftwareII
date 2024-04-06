@@ -1,32 +1,54 @@
-const N = 10
+const N = 2
 range T = 0..N
 // El alfabeto de la variable compartida se declara explícitamente
-set VarAlpha = {value.{read[T],write[T]}}
+set VarAlpha = {value.{read[T], write[T], acquire, release}}
 
 DIRECTOR = (open->close->DIRECTOR).
 
 CONTROLLER = (open->close->CONTROLLER).
 
-VAR = VAR[0],
-VAR[u:T] = (
-    read[u]->VAR[u]
-    |write[v:T]->VAR[v]
+LOCK = (acquire->release->LOCK).
+COUNTER = COUNTER[0],
+COUNTER[u:T] = (
+    read[u]->COUNTER[u]
+    |write[v:T]->COUNTER[v]
 ).
+||LOCK_COUNTER = (LOCK || COUNTER).
 
 EAST = (open->RUN),
 RUN = (
     arrive->INCREMENT
     |close->EAST
 ),
-INCREMENT = (value.read[x:T]->value.write[x+1]->RUN)+VarAlpha.
+INCREMENT = (
+    value.acquire->value.read[x:T]->(
+        when(x < N) value.write[x+1]->value.release->RUN
+        |when(x == N) value.release->RUN
+    )
+)+{value.write[0]}.
 
 WEST = (open->RUN),
 RUN = (
-    leave->DECREASE
+    leave->DECREMENT
     |close->CHECK_NO_ONE
 ),
-CHECK_NO_ONE = (value.read[x:T]->(
-    when (value>0) RUN
-    |when (value==0) WEST
-)),
-DECREASE = (value.read[x:T]->value.write[x-1]->RUN)+VarAlpha.
+DECREMENT = (
+    value.acquire->value.read[x:T]->(
+        when (x > 0) value.write[x-1]->value.release->RUN
+        |when(x == 0) value.release->RUN
+    )
+),
+CHECK_NO_ONE = (
+    value.acquire->value.read[x:T]->(
+        when (x > 0) value.release->WAIT_EMPTY
+        |when (x == 0) value.release->WEST
+    )
+),
+WAIT_EMPTY = (leave->
+    value.acquire->value.read[x:1..N]->value.write[x-1]->value.release->CHECK_NO_ONE
+)+{value.write[2]}.
+
+||MUSEUM = (
+    DIRECTOR || CONTROLLER ||
+    east:EAST || west:WEST || {east, west}::value:LOCK_COUNTER
+)/{open /{east, west}.open, close /{east, west}.close}.

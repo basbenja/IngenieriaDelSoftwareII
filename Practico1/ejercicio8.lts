@@ -1,6 +1,13 @@
-RADIO = (on->highest->RUN),
-RUN = (
-    reset->highest->RUN
-    |scan->(lowest->RUN|found->RUN)
+const N = 2
+range F = 0..N
+
+RADIO = (on->FREQ[N]),
+FREQ[i:F] = (
+    reset->FREQ[N]
+    |scan->SCANNING[i]
     |off->RADIO
+),
+SCANNING[i:F] = (
+    when (i>0) scanning->SCANNING[i-1]
+    |lock->FREQ[i]
 ).

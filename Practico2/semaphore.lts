@@ -1,0 +1,17 @@
+SEMAPHORE(N=0) = SEMA[N],
+SEMA[i:0..N] = (
+    // Wake up a process
+    up->SEMA[i+1]
+    // Resource acquired
+    |when (i>0) down->SEMA[i-1]
+),
+SEMA[N+1] = ERROR.
+
+range T = 0..1
+VAR = VAR[0],
+VAR[i:T] = (
+    read[i]->VAR[i]
+    |write[j:T]->VAR[j]
+).
+
+||SEMVAR = (SEMAPHORE(1) || VAR).
