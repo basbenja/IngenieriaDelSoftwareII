@@ -1,0 +1,37 @@
+// NO IMPORTA EL VALOR QUE SE ESTE ESCRIBIENDO O LEYENDO, sino solamente el
+// hecho que se esté escribiendo o leyendo
+
+// Semáforos es un nivel de abstracción más detallado, que en este caso no es
+// estrictamente necesario
+
+const K = 3
+range P = 1..K
+
+// Amount of readers
+const N = 2
+range R = 1..N
+// Amount of writers
+const M = 2
+range W = 1..M
+
+READER = (acquire.read->release.read->READER).
+WRITER = (acquire.write->release.write->WRITER).
+
+CONTROLLER = (
+    acquire.read->READING[1]
+    |acquire.write->WRITING
+),
+WRITING = (release.write->CONTROLLER),
+READING[i:P] = (
+    when(i < K) acquire.read->READING[i+1]
+    |when (i > 1 && i <= K) release.read->READING[i-1]
+    |when (i == 1) release.read->CONTROLLER
+).
+
+||SYSTEM = (r[R]:READER || w[W]:WRITER || CONTROLLER)
+/{
+    {r[R]}.acquire.read /acquire.read,
+    {r[R]}.release.read /release.read,
+    {w[W]}.acquire.write /acquire.write,
+    {w[W]}.release.write /release.write
+}.

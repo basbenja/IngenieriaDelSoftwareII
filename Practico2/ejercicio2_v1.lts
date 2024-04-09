@@ -18,23 +18,17 @@ READER = (acquire->release->READER).
 WRITER = (acquire->release->WRITER).
 
 CONTROLLER = (
-    r[j:R].acquire->READING
+    r[i:R].acquire->READING[1]
     |w[j:W].acquire->WRITING
 ),
-WRITING = (w[j:W].release->CONTROLLER[0]),
-READING = (
-    r[j:R].acquire
+WRITING = (w[j:W].release->CONTROLLER),
+READING[i:P] = (
+    when(i < K) r[j:R].acquire->READING[i+1]
+    |when (i==1) r[j:R].release->CONTROLLER
+    |when (i > 1) r[j:R].release->READING[i-1]
 ).
 
-||SYSTEM = ().
+||SYSTEM = (r[R]:READER || w[W]:WRITER || CONTROLLER).
 
-
-// Otra opción
-READER = (acquire.read->release.read->READER).
-WRITER = (acquire.write->release.write->WRITER).
-
-CONTROLLER = (
-    reader.acquire
-).
-
-||SYSTEM = ().
+// Conclusión: si bien esto anda, es medio tedioso (y no tan intuitivo) que
+// el CONTROLLER tenga que saber cuantos readers y cuantos writers puede haber

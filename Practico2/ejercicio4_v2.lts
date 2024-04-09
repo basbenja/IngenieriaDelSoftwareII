@@ -1,0 +1,13 @@
+const Porc = 2
+const Salv = 4
+
+SAVAGE = (serve->SAVAGE) +{cook}.
+
+COOK = (cook->COOK) +{serve}.
+
+PAN = PAN[Porc],
+PAN[i:0..Porc] = (
+    when (i>0) serve->PAN[i-1]
+    |when (i ==0) cook->PAN[Porc]).
+
+||DINNER = ({s[0..Salv], c}::PAN || {s[0..Salv]}:SAVAGE || c:COOK).

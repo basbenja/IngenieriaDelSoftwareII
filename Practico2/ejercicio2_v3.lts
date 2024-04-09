@@ -1,0 +1,21 @@
+set VarAlpha = {value.{acq_r, acq_w, rel_r, rel_w}}
+
+READER = (value.acq_r -> value.rel_r -> READER).
+WRITER = (value.acq_w -> value.rel_w -> WRITER).
+
+VAR(K=3) = (
+    acq_r -> READING[1]
+    |acq_w -> WRITING
+),
+READING[i:1..K] = (
+    when (i==1) rel_r -> VAR
+    |when (i>1)  rel_r -> READING[i-1]
+    |when (i<K)  acq_r -> READING[i+1]
+),
+WRITING = (rel_w -> VAR).
+
+||RW(N=5,M=4) = (
+    forall [i:1..N] r[i]:READER
+    || forall [i:1..M] w[i]:WRITER
+    || {r[1..N], w[1..M]}::value:VAR(3)
+).

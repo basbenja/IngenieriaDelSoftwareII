@@ -1,0 +1,34 @@
+/*
+The Dining Savages: Una tribu de salvajes disfruta de una cena comunitaria.
+Cada uno se sirve de una gran olla que contiene hasta M porciones de estofado
+de misionero.
+Cuando un salvaje quiere comer se sirve una porción de la olla al menos que esta
+este vacía en cuyo caso espera hasta que esta se vuelva a llenar. Si la olla se
+vacía, el cocinero de la tribu la vuelve a llenar con M porciones.
+Modele los salvajes, el cocinero y la olla.
+*/
+
+const M = 2     // Cantidad de porciones
+range P = 0..M
+
+const K = 3     // Cantidad de salvajes
+range S = 1..K
+
+// Un salvaje se sirve y come (o sea, no se puede volver a servir si no come
+// lo que ya tiene).
+SAVAGE = (pan.serve->eat->SAVAGE).
+
+// Lo único que hace el cocinero es cocinar. Vamos a suponer que cocina las K
+// porciones de una.
+COOK = (pan.cook->COOK).
+
+// La olla sería el recurso compartido.Vamos a suponer que la olla está
+// inicialmente llena (o sea tiene M porciones).
+PAN = PORTIONS[M],
+PORTIONS[i:P] = (
+    when (i>0) serve->PORTIONS[i-1]
+    |when (i==0) cook->PORTIONS[M]
+).
+
+||DINNER = (s[S]:SAVAGE|| COOK || s[S]::pan:PAN)
+    /{pan.cook /{s[S].pan.cook}}.
