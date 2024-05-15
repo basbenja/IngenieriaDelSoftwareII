@@ -1,0 +1,31 @@
+const A = 0
+const B = 1
+range ObjType = A..B
+
+// El primer brazo es el que agarra un objeto de la cinta y en base al tipo del
+// objeto, lo pone en la prensa o en el taladro
+ARM1 = (grab[i:ObjType]->(
+    when(i==A) p.put->ARM1
+    |when(i==B) d.put->ARM1
+)).
+
+// El segundo brazo agarra el objeto listo ya sea de la prensa o del taladro
+// y lo manda a la salida. Solo puede agarrar de a un objeto a la vez.
+ARM2 = (grab->put->ARM2).
+
+PRESS = FREE,
+FREE = (put->OCCUPIED),
+OCCUPIED = (press->ready->FREE).
+
+DRILL = FREE,
+FREE = (put->OCCUPIED),
+OCCUPIED = (drill->ready->FREE).
+
+CONVEYOR = (start->move->stop->CONVEYOR).
+
+||PRODUCTION_CELL = (
+    c:CONVEYOR || ARM1 || p:PRESS || d:DRILL || a2:ARM2
+)/{
+    grab[ObjType] /c.stop,
+    {p.ready, d.ready} /a2.grab
+}.

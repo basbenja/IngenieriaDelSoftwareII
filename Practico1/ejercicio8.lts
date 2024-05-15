@@ -1,9 +1,12 @@
-const N = 2
-range F = 0..N
+const N = 2     // Cantidad de frecuencias
+range F = 0..N  // Rango de frecuencias
 
+// Apenas la prendo, se sintoniza en la frecuencia más alta
 RADIO = (on->FREQ[N]),
 FREQ[i:F] = (
+    // Cuando se apreta el botón reset, se sintoniza en la frecuencia más alta
     reset->FREQ[N]
+    // Cuando se apreta el botón scan, empieza a escanear para abajo
     |scan->SCANNING[i]
     |off->RADIO
 ),

@@ -1,7 +1,8 @@
 // Ejercicio 4
 range T = 0..2
+
 VARIABLE = (write[i:T]->WRITTEN[i]),
 WRITTEN[j:T] = (
-	read[j]->WRITTEN[j]
-	|write[k:T]->WRITTEN[k]
+    read[j]->WRITTEN[j]
+    |write[k:T]->WRITTEN[k]
 ).

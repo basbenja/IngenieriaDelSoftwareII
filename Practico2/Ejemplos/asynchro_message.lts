@@ -1,0 +1,32 @@
+range M = 0..9
+set S = {[M], [M][M]}
+
+PORT //empty state, only send permitted
+    = (send[x:M]->PORT[x]),
+PORT[h:M] //one message queued to port
+    = (
+        send[x:M]->PORT[x][h]
+        |receive[h]->PORT
+),
+// Al poner t:S, puedo tener t = [i:M] o t = [i:M][j:M]
+PORT[t:S][h:M] //two or more messages queued to port
+    = (
+        send[x:M]->PORT[x][t][h]
+        |receive[h]->PORT[t]
+).
+
+ASENDER = ASENDER[0],
+ASENDER[e:M] = (port.send[e]->ASENDER[(e+1)%10]).
+
+ARECEIVER = (port.receive[v:M]->ARECEIVER).
+
+||AsyncMsg = (s[1..2]:ASENDER || ARECEIVER || port:PORT)
+/{
+    s[1..2].port.send/port.send
+}.
+
+||Abstract = AsyncMsg
+/{
+    s[1..2].port.send/s[1..2].port.send[M],
+    port.receive/port.receive[M]
+}.

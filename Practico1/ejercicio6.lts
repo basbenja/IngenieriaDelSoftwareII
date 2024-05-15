@@ -1,4 +1,3 @@
-// Ejercicio 6
 /*
 INTERPRETACTION: cuando está en un nivel, se queda emitiendo la señal correspondiente
 hasta que llegue un valor que la haga cambiar (o no):

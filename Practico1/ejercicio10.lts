@@ -1,6 +1,9 @@
 const N = 2
 range T = 0..N
+
 // El alfabeto de la variable compartida se declara explícitamente
+// En este caso, la variable compartida es el número de personas que hay en el
+// museo
 set VarAlpha = {value.{read[T], write[T], acquire, release}}
 
 DIRECTOR = (open->close->DIRECTOR).

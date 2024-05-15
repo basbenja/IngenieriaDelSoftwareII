@@ -1,4 +1,4 @@
-// Ejercicio 7
+// Cada número i que aparece representa a 5*i
 range A = 1..6
 set Values = {[1], [2], [4]}
 

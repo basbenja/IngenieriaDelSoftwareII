@@ -1,0 +1,15 @@
+ARM = (grab->put->ARM).
+
+PRESS = FREE,
+FREE = (put->OCCUPIED),
+OCCUPIED = (press->ready->FREE).
+
+CONVEYOR = (start->move->stop->CONVEYOR).
+
+||PRODUCTION_CELL = (
+    c:CONVEYOR || a1:ARM || p:PRESS || a2:ARM
+)/{
+    a1.grab /c.stop,
+    a1.put /p.put,
+    p.ready /a2.grab
+}.

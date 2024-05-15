@@ -1,0 +1,17 @@
+ELEVATOR = CAPACITY[0],
+CAPACITY[i:0..10] = (
+    when (i==0) enter->CAPACITY[i+1]
+    |when (i>0 && i<10) enter->CAPACITY[i+1]
+    |when (i>0 && i<10) exit->CAPACITY[i-1]
+    |when (i==10) exit->CAPACITY[i-1]
+).
+
+property MAX10 = CAPACITY[0],
+CAPACITY[i:0..10] = (
+    when (i==0) enter->CAPACITY[i+1]
+    |when (i>0 && i<10) enter->CAPACITY[i+1]
+    |when (i>0 && i<10) exit->CAPACITY[i-1]
+    |when (i==10) exit->CAPACITY[i-1]
+).
+
+||SAFE_ELEVATOR = (ELEVATOR || MAX10).

@@ -1,0 +1,18 @@
+ROBOT_SUJ = (grab->assemble->put->ROBOT_SUJ).
+ROBOT_ENS = (assemble->ROBOT_ENS).
+CINTA(N=5) = COUNT[0],
+COUNT[i:0..N] = (when(i<N) put->COUNT[i+1]
+                |when(i>0) get->COUNT[i-1]
+                ).
+
+||ENSAMBLE_A_CINTA = (ROBOT_SUJ || ROBOT_ENS || CINTA).
+
+ROBOT_VERIF = (grab->verify->(put->ROBOT_VERIF|discard->ROBOT_VERIF)).
+ROBOT_EMB = (grab->wrap->ready->ROBOT_EMB).
+
+||FABRICA = ({r1,r2}:ENSAMBLE_A_CINTA || rv:ROBOT_VERIF || c3:CINTA || re:ROBOT_EMB)
+/{
+    rv.grab /{r1, r2}.get,
+    c3.put /rv.put,
+    re.grab /c3.get
+}.

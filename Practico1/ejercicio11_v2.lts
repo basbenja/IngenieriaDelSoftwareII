@@ -1,0 +1,35 @@
+// Estado 0 de la cinta: no hay nada en la cinta
+// Estado 1 de la cinta: un objeto llegó al final de la cinta
+BELT = BELT[0],
+BELT[i:0..1] = (status[i] -> BELT[i]
+               |when (i==0) arrival -> BELT[i+1]
+               |when (i==1) grab -> BELT[i-1]).
+
+// Estad
+ARM1 = (b.status[i:0..1] -> p.status[j:0..2] ->
+       (when (i == 1 && j == 0) b.grab -> p.arrival -> ARM1
+       |when (i != 1 || j != 0) waiting -> ARM1
+       )).
+
+PRESS = PRESS[0],
+PRESS[i:0..2] = (status[i] -> PRESS[i]
+                |when (i==0) arrival ->  PRESS[i+1]
+                |when (i==1) press -> PRESS[i+1]
+                |when (i==2) grab -> PRESS[0]).
+
+ARM2 = (p.status[i:0..2] ->
+       (when (i == 2) p.grab -> exit -> ARM2
+       |when (i != 2) waiting -> ARM2
+       )).
+
+BOXES = (arrival -> BOXES).
+
+||FACTORY = (b:BELT || a1:ARM1 || p:PRESS || a2:ARM2 || BOXES)
+/{
+       {a1, a2}.p.status[i:0..2] / p.status[i],
+       a2.p.grab / p.grab,
+       a1.p.arrival / p.arrival,
+       a1.b.status[i:0..1] / b.status[i],
+       b.arrival / arrival,
+       a1.b.grab / b.grab
+}.
