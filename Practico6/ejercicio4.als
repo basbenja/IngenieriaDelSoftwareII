@@ -1,29 +1,39 @@
-sig Node { }
-
-sig Graph {
-    edges: Node -> Node
+sig Node { }{
+    some g: Graph | Node in g.nodes
 }
 
-pred acyclic [g: Graph] {
+sig Graph {
+    nodes: set Node,
+    edges: nodes -> nodes
+}
+
+pred Acyclic [g: Graph] {
     no (^(g.edges) & iden)
 }
 
-pred notDirected [g: Graph] {
+pred NotDirected [g: Graph] {
     g.edges = ~(g.edges)
 }
 
-pred stronglyConnected [g: Graph] {
-    ^(g.edges) = (Node -> Node)
+pred StronglyConnected [g: Graph] {
+    ^(g.edges) = (g.nodes -> g.nodes)
 }
 
-pred connected [g: Graph] {
+pred Connected [g: Graph] {
     ^(g.edges + ~(g.edges)) = (Node -> Node)
 }
 
-pred stronglyConnectedComponent [g: Graph] {
-
+pred StronglyConnectedComponent [g: Graph] {
+    some gIn: Graph |
+        (gIn.nodes in g.nodes) &&
+        (gIn.edges in g.edges) &&
+        StronglyConnected[gIn]
 }
+run StronglyConnectedComponent for 2 but exactly 1 Graph
 
 pred connectedComponent [g: Graph] {
-
+    some gIn: Graph |
+        (gIn.nodes in g.nodes) &&
+        (gIn.edges in g.edges) &&
+        Connected[gIn]
 }

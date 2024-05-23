@@ -1,10 +1,7 @@
-open util/ordering [State]
-
 sig Addr, Data { }
 
 sig Memory {
     addrs: set Addr,
-    // lone = a lo sumo uno (o sea, uno o ninguno)
     map: addrs -> lone Data
 }
 
@@ -17,60 +14,82 @@ sig Cache extends Memory {
 sig System {
     cache: Cache,
     main: MainMemory
+}{
+    cache.addrs in main.addrs
 }
 
-// Restricción que asegura que la memoria cache no direcciona fuera de la
-// memoria principal
-fact {
-    all s:System | s.cache.addrs in s.main.addrs
-}
 
-// La idea es que el Write se va a hacer siempre sobre la cache
-// El único momento en que se hace un Write sobre la memoria es cuando se hace
-// un Flush sobre la cache
-pred Write[m_i, m_o: Memory, a: Addr, d : Data] {
+// Predicados Auxiliares
+pred WriteMain[m_i, m_o: MainMemory, a: Addr, d: Data] {
     m_o.map = m_i.map ++ (a -> d)
-    m_o.dirty = m_i.dirty + d
 }
 
-// La idea es que el Read se va a hacer siempre sobre la cache
-pred Read[d_o: Data, m: Memory, a: Addr] {
+pred ReadMain[m: MainMemory, a: Addr, d_o: Data] {
     // Se hace de esta forma porque en una dirección puede no haber un dato
     // some d se hace verdadero si d no es "nada"
     let d = m.map[a] | some d implies d_o = m.map[a]
 }
 
-// Lo que hace el Flush es limpiar es las direcciones dirty escribirlas en la
-// memoria y vaciar el conjunto de direcciones dirty
+
+// Predicados para Sistemas
+pred Write[s_i, s_o: System, a: Addr, d: Data] {
+    s_o.cache.map = s_i.cache.map ++ (a -> d)
+    s_o.cache.dirty = s_i.cache.dirty + a
+}
+
+pred Read[s: System, a: Addr, d_o: Data] {
+    // Se hace de esta forma porque en una dirección puede no haber un dato
+    // some d se hace verdadero si d no es "nada"
+    let d = s.cache.map[a] | some d implies d_o = s.cache.map[a]
+}
+
 pred Flush[s_i, s_o: System] {
-    all a: s_i.cache.dirty |
-        Write[s_i.main, s_o.main, a, s_i.cache.map[a]]
+    all a: s_i.cache.dirty | some d: Data |
+        Read[s_i, a, d] &&
+        WriteMain[s_i.main, s_o.main, a, d]
     s_o.cache.dirty = none
 }
 
-// Lo que hace el Load es: al hacer un miss sobre la cache (i.e. no tiene en la
-// cache la direccion que se quiere leer), la busca a la memoria principal
-// O sea, es como un read pero sobre la memoria principal
+// Al hacer un miss sobre la cache (i.e. no tiene en la cache la direccion que
+// se quiere leer), la busca a la memoria principal y la escribe en la cache
 pred Load[s_i, s_o: System, a: Addr] {
-    Read[,s.main, d] && Write[s.cache, s.cache, a, s.main.map[a]]
+    !(a in s_i.cache.addrs)
+    some d: Data |
+        ReadMain[s_i.main, a, d] &&
+        Write[s_i, s_o, a, d]
+    s_o.main = s_i.main
 }
 
+
+// Predicado de Consistencia
 pred Consistent [s: System] {
+    // Se fija que el map de la cache sea igual al map de la principal excepto
+    // por aquellas direcciones que están dirty
     s.cache.map - (s.cache.dirty -> Data) in s.main.map
 }
 
-sig State {
-    s: System
-}
 
-// Estado inicial (predicado auxiliar)
-pred init [s: System] {no s.main and no s.cache}
-
-// Traza
-fact Traces {
-    init[first]
-    all s1:State, s2:next[s1] |
-        (some a:Addr, d:Data | read[s1.mem,a,d] and s1 = s2)
-        or
-        (some a:Addr, d:Data | write[s1.mem,s2.mem,a,d])
+// Aserciones para verificar que las operaciones preservan Consistencia
+assert WriteAndConsistent {
+    all s_i, s_o: System, a: Addr, d: Data |
+        (Consistent[s_i] && Write[s_i, s_o, a, d]) implies Consistent[s_i]
 }
+check WriteAndConsistent for 3 but exactly 1 System, 2 Memory
+
+assert ReadAndConsistent {
+    all s_i: System, d: Data, a: Addr |
+        (Consistent[s_i] && Read[s_i, a, d]) implies Consistent[s_i]
+}
+check ReadAndConsistent for 3 but exactly 1 System, 2 Memory
+
+assert FlushAndConsistent {
+    all s_i, s_o: System |
+        (Consistent[s_i] && Flush[s_i, s_o]) implies Consistent[s_i]
+}
+check FlushAndConsistent for 3 but exactly 1 System, 2 Memory
+
+assert LoadAndConsistent {
+    all s_i, s_o: System, a: Addr |
+        (Consistent[s_i] && Load[s_i, s_o, a]) implies Consistent[s_i]
+}
+check LoadAndConsistent for 3 but exactly 1 System, 2 Memory
