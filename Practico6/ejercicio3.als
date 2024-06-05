@@ -72,24 +72,24 @@ pred Consistent [s: System] {
 // Aserciones para verificar que las operaciones preservan Consistencia
 assert WriteAndConsistent {
     all s_i, s_o: System, a: Addr, d: Data |
-        (Consistent[s_i] && Write[s_i, s_o, a, d]) implies Consistent[s_i]
+        (Consistent[s_i] && Write[s_i, s_o, a, d]) implies Consistent[s_o]
 }
-check WriteAndConsistent for 3 but exactly 1 System, 2 Memory
+check WriteAndConsistent for 6 but exactly 1 System, 2 Memory
 
 assert ReadAndConsistent {
     all s_i: System, d: Data, a: Addr |
         (Consistent[s_i] && Read[s_i, a, d]) implies Consistent[s_i]
 }
-check ReadAndConsistent for 3 but exactly 1 System, 2 Memory
+check ReadAndConsistent for 6 but exactly 1 System, 2 Memory
 
 assert FlushAndConsistent {
     all s_i, s_o: System |
-        (Consistent[s_i] && Flush[s_i, s_o]) implies Consistent[s_i]
+        (Consistent[s_i] && Flush[s_i, s_o]) implies Consistent[s_o]
 }
-check FlushAndConsistent for 3 but exactly 1 System, 2 Memory
+check FlushAndConsistent for 6 but exactly 1 System, 2 Memory
 
 assert LoadAndConsistent {
     all s_i, s_o: System, a: Addr |
-        (Consistent[s_i] && Load[s_i, s_o, a]) implies Consistent[s_i]
+        (Consistent[s_i] && Load[s_i, s_o, a]) implies Consistent[s_o]
 }
-check LoadAndConsistent for 3 but exactly 1 System, 2 Memory
+check LoadAndConsistent for 6 but exactly 1 System, 2 Memory
