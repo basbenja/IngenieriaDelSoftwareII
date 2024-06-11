@@ -20,7 +20,7 @@ pred StronglyConnected [g: Graph] {
 }
 
 pred Connected [g: Graph] {
-    ^(g.edges + ~(g.edges)) = (Node -> Node)
+    *(g.edges + ~(g.edges)) = (Node -> Node)
 }
 
 pred StronglyConnectedComponent [g: Graph] {
