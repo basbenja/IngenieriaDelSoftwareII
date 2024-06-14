@@ -6,13 +6,13 @@ sig BinaryR {
 }
 
 pred reflexive[r: BinaryR] {
-    (iden & (Elem -> Elem)) in r.tuples
+    (iden & (r.elems -> r.elems)) in r.tuples
 }
 pred transitive[r: BinaryR] {
     (r.tuples).(r.tuples) in r.tuples
 }
 pred antisymmetric[r: BinaryR] {
-    (r.tuples) & ~(r.tuples) in (iden & (Elem -> Elem))
+    (r.tuples) & ~(r.tuples) in (iden & (r.elems -> r.elems))
 }
 
 pred preOrder [r: BinaryR] {
@@ -26,7 +26,7 @@ pred partialOrder [r: BinaryR] {
 pred totalOrder [r: BinaryR] {
     partialOrder[r]
     // Todos los elementos están relacionados
-    r.tuples + ~(r.tuples) = (Elem -> Elem)
+    r.tuples + ~(r.tuples) = (r.elems -> r.elems)
 }
 
 pred strictOrder [r: BinaryR] {

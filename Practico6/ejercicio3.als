@@ -35,6 +35,7 @@ pred ReadMain[m: MainMemory, a: Addr, d_o: Data] {
 pred Write[s_i, s_o: System, a: Addr, d: Data] {
     s_o.cache.map = s_i.cache.map ++ (a -> d)
     s_o.cache.dirty = s_i.cache.dirty + a
+    s_o.main = s_i.main
 }
 
 pred Read[s: System, a: Addr, d_o: Data] {
@@ -47,7 +48,9 @@ pred Flush[s_i, s_o: System] {
     all a: s_i.cache.dirty | some d: Data |
         Read[s_i, a, d] &&
         WriteMain[s_i.main, s_o.main, a, d]
-    s_o.cache.dirty = none
+    no s_i.cache.dirty implies s_o = s_i
+    no s_o.cache.dirty
+    s_o.cache.map = s_i.cache.map
 }
 
 // Al hacer un miss sobre la cache (i.e. no tiene en la cache la direccion que
@@ -74,7 +77,7 @@ assert WriteAndConsistent {
     all s_i, s_o: System, a: Addr, d: Data |
         (Consistent[s_i] && Write[s_i, s_o, a, d]) implies Consistent[s_o]
 }
-check WriteAndConsistent for 6 but exactly 1 System, 2 Memory
+check WriteAndConsistent for 3 but exactly 2 System, 4 Memory
 
 assert ReadAndConsistent {
     all s_i: System, d: Data, a: Addr |
@@ -86,10 +89,10 @@ assert FlushAndConsistent {
     all s_i, s_o: System |
         (Consistent[s_i] && Flush[s_i, s_o]) implies Consistent[s_o]
 }
-check FlushAndConsistent for 6 but exactly 1 System, 2 Memory
+check FlushAndConsistent for 2 but exactly 2 System, 3 Memory
 
 assert LoadAndConsistent {
     all s_i, s_o: System, a: Addr |
         (Consistent[s_i] && Load[s_i, s_o, a]) implies Consistent[s_o]
 }
-check LoadAndConsistent for 6 but exactly 1 System, 2 Memory
+check LoadAndConsistent for 6 but exactly 2 System, 4 Memory

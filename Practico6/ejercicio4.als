@@ -1,6 +1,4 @@
-sig Node { }{
-    some g: Graph | Node in g.nodes
-}
+sig Node { }
 
 sig Graph {
     nodes: set Node,
@@ -16,11 +14,13 @@ pred NotDirected [g: Graph] {
 }
 
 pred StronglyConnected [g: Graph] {
-    ^(g.edges) = (g.nodes -> g.nodes)
+    *(g.edges) = (g.nodes -> g.nodes)
 }
+run StronglyConnected for 3 but exactly 1 Graph
 
 pred Connected [g: Graph] {
-    *(g.edges + ~(g.edges)) = (Node -> Node)
+    (*(g.edges + ~(g.edges))) & (g.nodes -> g.nodes) = (g.nodes -> g.nodes)
+    (g.nodes -> g.nodes) in *(g.edges + ~(g.edges))
 }
 
 pred StronglyConnectedComponent [g: Graph] {
